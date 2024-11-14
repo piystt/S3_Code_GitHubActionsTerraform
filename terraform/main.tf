@@ -48,3 +48,40 @@ resource "azurerm_app_service" "website" {
   }
 }
 
+resource "azurerm_log_analytics_workspace" "log" {
+  name                = "piystt-lg-analytics"
+  location            = data.azurerm_resource_group.wsdevops.location
+  resource_group_name = data.azurerm_resource_group.wsdevops.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_application_insights" "appi" {
+  name                = "piystt123-api"
+  location            = data.azurerm_resource_group.wsdevops.location
+  resource_group_name = data.azurerm_resource_group.wsdevops.name
+  workspace_id        = azurerm_log_analytics_workspace.log.id
+  application_type    = "web"
+}
+
+// Skeleton for linking web app and app insights
+resource "null_resource" "link_monitoring" {
+  provisioner "local-exec" {
+    command = <<EOT
+      # Login to Azure CLI (Linux operating system assumed)
+      az login --service-principal -u $con_client_id -p $con_client_secret --tenant $con_tenant_id
+      # TODO your scripting code
+    EOT
+    environment = {
+      // Parameters needed to login
+      con_client_id     = TODO
+      con_client_secret = TODO
+      con_tenant_id     = TODO
+      // Parameters needed for linking
+      inst_key          = TODO
+      conn_str          = TODO      
+      rg_name           = TODO
+      web_app_name      = TODO
+    }
+  }
+}
